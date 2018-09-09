@@ -2,11 +2,11 @@
 declare(strict_types = 1);
 $username; // set by init later, but need em global.
 $password;
-function print_usage_and_die(){
+function print_usage_and_die() {
 	global $argv;
-	//var_dump($argv);
-	fprintf(STDERR,"usage: %s --credentialsfile=creds.txt\n(creds are newline based, email on line 1, password on line 2. you can also use the shorter `-c` )\n",$argv[0]);
-	die(1);
+	// var_dump($argv);
+	fprintf ( STDERR, "usage: %s --credentialsfile=creds.txt\n(creds are newline based, email on line 1, password on line 2. you can also use the shorter `-c` )\n", $argv [0] );
+	die ( 1 );
 }
 function init() {
 	global $argv;
@@ -28,35 +28,35 @@ function init() {
 	if (strtolower ( php_sapi_name () ) !== 'cli') {
 		throw new Exception ( "this script should only run in CLI, but runs in: " . php_sapi_name () );
 	}
-	$args = getopt ( "c::", [
-	//		"username::",
-	//		"password::",
-			"credentialsfile::",
+	$args = getopt ( "c::", [ 
+			// "username::",
+			// "password::",
+			"credentialsfile::" 
 	] );
-	if(empty($args)){
-		print_usage_and_die();
+	if (empty ( $args )) {
+		print_usage_and_die ();
 	}
-	$cfile=NULL;
-	if(!empty($args['c'])){
-		$cfile=$args['c'];
-	}elseif(!empty($args['credentialsfile'])){
-		$cfile=$args['credentialsfile'];
-	}else{
-		fprintf(STDERR,"unable to read credentialsfile location! ( -c=path/to_file.txt )\n");
-		die(1);
+	$cfile = NULL;
+	if (! empty ( $args ['c'] )) {
+		$cfile = $args ['c'];
+	} elseif (! empty ( $args ['credentialsfile'] )) {
+		$cfile = $args ['credentialsfile'];
+	} else {
+		fprintf ( STDERR, "unable to read credentialsfile location! ( -c=path/to_file.txt )\n" );
+		die ( 1 );
 	}
-	$creds_raw=NULL;
-	if($cfile==='-'){
-		$creds_raw=stream_get_meta_data(STDIN);
-	}else{
-		$creds_raw=file_get_contents($cfile);
+	$creds_raw = NULL;
+	if ($cfile === '-') {
+		$creds_raw = stream_get_meta_data ( STDIN );
+	} else {
+		$creds_raw = file_get_contents ( $cfile );
 	}
-	$creds_raw=array_filter(array_map('trim',explode("\n",$creds_raw)),'strlen');
-	if(count($creds_raw)!==2){
-		fprintf("error, found more than 2 newlines in credentials file! line 1 must be the email, line 2 must be the password, line 3 must not exist.");
+	$creds_raw = array_filter ( array_map ( 'trim', explode ( "\n", $creds_raw ) ), 'strlen' );
+	if (count ( $creds_raw ) !== 2) {
+		fprintf ( "error, found more than 2 newlines in credentials file! line 1 must be the email, line 2 must be the password, line 3 must not exist." );
 	}
-	$username=$creds_raw[0];
-	$password=$creds_raw[1];
+	$username = $creds_raw [0];
+	$password = $creds_raw [1];
 	require_once ('hhb_.inc.php'); // hhb_curl
 	hhb_init (); // just better error reporting for uncaught exceptions.
 }
@@ -74,8 +74,8 @@ class Fb_message_monitor {
 		$this->hc->setopt_array ( array (
 				CURLOPT_USERAGENT => 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9300; en) AppleWebKit/534.8+ (KHTML, like Gecko) Version/6.0.0.570 Mobile Safari/534.8+',
 				CURLOPT_HTTPHEADER => array (
-						'accept-language:en-US,en;q=0.8'
-				)
+						'accept-language:en-US,en;q=0.8' 
+				) 
 		) );
 		$this->login ();
 	}
@@ -87,8 +87,8 @@ class Fb_message_monitor {
 		$hc->setopt_array ( array (
 				CURLOPT_URL => 'https://m.facebook.com/',
 				CURLOPT_HTTPHEADER => array (
-						'accept-language:en-US,en;q=0.8'
-				)
+						'accept-language:en-US,en;q=0.8' 
+				) 
 		) )->exec ();
 		$domd = @\DOMDocument::loadHTML ( $hc->getStdOut () );
 		$form = getDOMDocumentFormInputs ( $domd, true ) ['login_form'];
@@ -100,47 +100,47 @@ class Fb_message_monitor {
 			}
 			return $ret;
 		});
-			$postfields = $postfields (); // sorry about that, eclipse can't handle IIFE syntax.
-			assert ( array_key_exists ( 'email', $postfields ) );
-			assert ( array_key_exists ( 'pass', $postfields ) );
-			$postfields ['email'] = $this->email;
-			$postfields ['pass'] = $this->password;
-			$hc->setopt_array ( array (
-					CURLOPT_POST => true,
-					CURLOPT_POSTFIELDS => http_build_query ( $postfields ),
-					CURLOPT_HTTPHEADER => array (
-							'accept-language:en-US,en;q=0.8'
-					)
-			) );
-			// \hhb_var_dump ($postfields ) & die ();
+		$postfields = $postfields (); // sorry about that, eclipse can't handle IIFE syntax.
+		assert ( array_key_exists ( 'email', $postfields ) );
+		assert ( array_key_exists ( 'pass', $postfields ) );
+		$postfields ['email'] = $this->email;
+		$postfields ['pass'] = $this->password;
+		$hc->setopt_array ( array (
+				CURLOPT_POST => true,
+				CURLOPT_POSTFIELDS => http_build_query ( $postfields ),
+				CURLOPT_HTTPHEADER => array (
+						'accept-language:en-US,en;q=0.8' 
+				) 
+		) );
+		// \hhb_var_dump ($postfields ) & die ();
+		$hc->exec ( $url );
+		$domd = @\DOMDocument::loadHTML ( $hc->getResponseBody () );
+		$xp = new \DOMXPath ( $domd );
+		$InstallFacebookAppRequest = $xp->query ( "//a[contains(@href,'/login/save-device/cancel/')]" );
+		if ($InstallFacebookAppRequest->length > 0) {
+			// not all accounts get this, but some do, not sure why, anyway, if this exist, fb is asking "ey wanna install the fb app instead of using the website?"
+			// and won't let you proceed further until you say yes or no. so we say no.
+			$url = 'https://m.facebook.com' . $InstallFacebookAppRequest->item ( 0 )->getAttribute ( "href" );
 			$hc->exec ( $url );
 			$domd = @\DOMDocument::loadHTML ( $hc->getResponseBody () );
 			$xp = new \DOMXPath ( $domd );
-			$InstallFacebookAppRequest = $xp->query ( "//a[contains(@href,'/login/save-device/cancel/')]" );
-			if ($InstallFacebookAppRequest->length > 0) {
-				// not all accounts get this, but some do, not sure why, anyway, if this exist, fb is asking "ey wanna install the fb app instead of using the website?"
-				// and won't let you proceed further until you say yes or no. so we say no.
-				$url = 'https://m.facebook.com' . $InstallFacebookAppRequest->item ( 0 )->getAttribute ( "href" );
-				$hc->exec ( $url );
-				$domd = @\DOMDocument::loadHTML ( $hc->getResponseBody () );
-				$xp = new \DOMXPath ( $domd );
-			}
-			unset ( $InstallFacebookAppRequest, $url );
-			$urlinfo = parse_url ( $hc->getinfo ( CURLINFO_EFFECTIVE_URL ) );
-			$a = $xp->query ( '//a[contains(@href,"/logout.php")]' );
-			if ($a->length < 1) {
-				$debuginfo = $hc->getStdErr () . $hc->getStdOut ();
-				$tmp = tmpfile ();
-				fwrite ( $tmp, $debuginfo );
-				$debuginfourl = shell_exec ( "cat " . escapeshellarg ( stream_get_meta_data ( $tmp ) ['uri'] ) . " | pastebinit" );
-				fclose ( $tmp );
-				throw new \RuntimeException ( 'failed to login to facebook! apparently... cannot find the logout url!  debuginfo url: ' . $debuginfourl );
-			}
-			$a = $a->item ( 0 );
-			$url = $urlinfo ['scheme'] . '://' . $urlinfo ['host'] . $a->getAttribute ( "href" );
-			$this->logoutUrl = $url;
-			// logged in :)
-			return;
+		}
+		unset ( $InstallFacebookAppRequest, $url );
+		$urlinfo = parse_url ( $hc->getinfo ( CURLINFO_EFFECTIVE_URL ) );
+		$a = $xp->query ( '//a[contains(@href,"/logout.php")]' );
+		if ($a->length < 1) {
+			$debuginfo = $hc->getStdErr () . $hc->getStdOut ();
+			$tmp = tmpfile ();
+			fwrite ( $tmp, $debuginfo );
+			$debuginfourl = shell_exec ( "cat " . escapeshellarg ( stream_get_meta_data ( $tmp ) ['uri'] ) . " | pastebinit" );
+			fclose ( $tmp );
+			throw new \RuntimeException ( 'failed to login to facebook! apparently... cannot find the logout url!  debuginfo url: ' . $debuginfourl );
+		}
+		$a = $a->item ( 0 );
+		$url = $urlinfo ['scheme'] . '://' . $urlinfo ['host'] . $a->getAttribute ( "href" );
+		$this->logoutUrl = $url;
+		// logged in :)
+		return;
 	}
 	protected function logout() {
 		$this->hc->setopt ( CURLOPT_HTTPGET, 1 )->exec ( $this->logoutUrl );
@@ -228,7 +228,7 @@ function getDOMDocumentFormInputs(\DOMDocument $domd, bool $getOnlyFirstMatches 
 				}
 				if (! array_key_exists ( $name, $ret )) {
 					$ret [$name] = array (
-							$input
+							$input 
 					);
 				} else {
 					$ret [$name] [] = $input;
@@ -247,12 +247,12 @@ function getDOMDocumentFormInputs(\DOMDocument $domd, bool $getOnlyFirstMatches 
 		}
 		if (! $hasName) {
 			$parsedForms [] = array (
-					$inputs
+					$inputs 
 			);
 		} else {
 			if (! array_key_exists ( $name, $parsedForms )) {
 				$parsedForms [$name] = array (
-						$inputs
+						$inputs 
 				);
 			} else {
 				$parsedForms [$name] [] = $tmp;
@@ -321,7 +321,7 @@ for(;;) {
 		echo "unread messages: ";
 		var_dump ( $num );
 		beep_until_canceled ();
-		goto ugly;// don't know how much time was spent in beep_* , so want to relogin now just in case cookie session expired.
+		goto ugly; // don't know how much time was spent in beep_* , so want to relogin now just in case cookie session expired.
 	}
 	echo ".";
 	sleep ( 60 );
