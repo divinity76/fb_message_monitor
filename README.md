@@ -9,7 +9,7 @@ if you're on Windows then you can get php-cli [here](https://www.cygwin.com/),
 
 first make a new text file, call it creds.txt (or whatever you want), put your facebook email in line 1, and your facebook password on line 2, don't make a line 3.
 
-then download `fb_message_monitor_standalone.php` from here https://github.com/divinity76/fb_message_monitor/releases/tag/1.0.0 , 
+then download `fb_message_monitor_standalone.php` from here https://github.com/divinity76/fb_message_monitor/releases , 
 and run in a terminal `php fb_message_monitor_standalone.php -c=path/to/creds.txt`
 
 if everything's going smoothly, you should see some version of this:
