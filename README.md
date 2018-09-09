@@ -24,3 +24,5 @@ now checking every 60 seconds (roughly)
 ................
 ```
 (with each dot representing each check, or 60 passed seconds-ish.)
+
+when you do get a message, your pc will start beeping until you press a key in the terminal (which makes the script stop beeing and start monitoring again) - to disable, just press ctrl+C
