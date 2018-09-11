@@ -311,18 +311,25 @@ function beep_until_canceled() {
 init ();
 stream_set_blocking ( STDIN, false );
 ugly:
-echo "logging in..";
-$o = new Fb_message_monitor ( $username, $password );
-echo "done.\n";
-echo "now checking every 60 seconds (roughly)\n";
-for(;;) {
-	$num = $o->get_number_of_unread_messages ();
-	if ($num !== 0) {
-		echo "unread messages: ";
-		var_dump ( $num );
-		beep_until_canceled ();
-		goto ugly; // don't know how much time was spent in beep_* , so want to relogin now just in case cookie session expired.
+try {
+	echo "logging in..";
+	$o = new Fb_message_monitor ( $username, $password );
+	echo "done.\n";
+	echo "now checking every 60 seconds (roughly)\n";
+	for(;;) {
+		$num = $o->get_number_of_unread_messages ();
+		if ($num !== 0) {
+			echo "unread messages: ";
+			var_dump ( $num );
+			beep_until_canceled ();
+			goto ugly; // don't know how much time was spent in beep_* , so want to relogin now just in case cookie session expired.
+		}
+		echo ".";
+		sleep ( 60 );
 	}
-	echo ".";
-	sleep ( 60 );
+} catch ( Exception $ex ) {
+	echo "something bad happened! exception! printing debug data and retrying..";
+	var_dump ( $ex );
+	goto ugly;
 }
+
