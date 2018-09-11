@@ -328,8 +328,8 @@ try {
 		sleep ( 60 );
 	}
 } catch ( Exception $ex ) {
-	echo "something bad happened! exception! printing debug data and retrying..";
+	echo "something bad happened! exception! printing debug data and beeping..";
 	var_dump ( $ex );
+	beep_until_canceled ();
 	goto ugly;
 }
-
